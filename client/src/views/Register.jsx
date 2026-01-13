@@ -50,7 +50,7 @@ export default function Register() {
           </Link>
         </span>
         <hr />
-        <button className="flex justify-center items-center bg-amber-300 font-medium gap-2 hover:cursor-pointer">
+        <button className="flex justify-center items-center rounded-xl bg-amber-300 font-medium gap-2 hover:cursor-pointer">
           <img
             src="google.png"
             alt="Google logo"

@@ -1,40 +1,49 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import AuthLayout from "./components/AuthLayout";
+
 import Home from "./views/Home";
-import Login from "./views/Login"
+import Login from "./views/Login";
 import Register from "./views/Register";
-import AuthLayout from "./components/AuthLayout"
+import About from "./views/About";
+import Faqs from "./views/Faqs";
+import UserCart from "./views/UserCart";
+import Membership from "./views/Membership";
 import ForgetPassword from "./views/ForgetPassword";
 import ResetPassword from "./views/ResetPassword";
-import Membership from "./views/Membership";
 
+const App = () => {
+  return (
+    <Routes>
+      {/* Main layout */}
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="faqs" element={<Faqs />} />
+        <Route path="cart" element={<UserCart />} />
+        <Route path="membership" element={<Membership />} />
+      </Route>
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Layout />,
-    errorElement: (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-red-300">
-        <h1 className="font-bold">404 - Page Not Found 😭😭</h1>
-      </div>
-    ),
-    children: [
-      { path: "/", element: <Home /> },
-      { path: "membership", element: <Membership /> },
-    ],
-  },
-  {
-    path: "/",
-    element: <AuthLayout />,
-    children: [
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <Register /> },
-      { path: "forgetpassword", element: <ForgetPassword /> },
-      { path: "resetpassword", element: <ResetPassword /> },
-    ],
-  }
-]);
+      {/* Auth layout */}
+      <Route path="/" element={<AuthLayout />}>
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Register />} />
+        <Route path="forgetpassword" element={<ForgetPassword />} />
+        <Route path="resetpassword" element={<ResetPassword />} />
+      </Route>
 
-export default function App() {
-  return <RouterProvider router={router} />;
-}
+      {/* 404 */}
+      <Route
+        path="*"
+        element={
+          <div className="min-h-screen flex justify-center items-center bg-red-300">
+            <h1 className="font-bold">404 - Page Not Found 😭😭</h1>
+          </div>
+        }
+      />
+    </Routes>
+  );
+};
+
+export default App;
