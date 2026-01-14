@@ -1,18 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Search, ShoppingBag, User, Heart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, ShoppingBag, User, Heart, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-  // Handle scroll effect for glassmorphism
   useEffect(() => {
+    // Check for logged in user
+    const username = localStorage.getItem("username");
+    if (username) {
+      setUser(username);
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser(null);
+    navigate("/");
+    window.location.reload();
+  };
 
   return (
     <>
@@ -26,10 +40,8 @@ const Navbar = () => {
         {/* Main Header Container */}
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Left area - Empty or Breadcrumbs (optional), removing Logo */}
-            <div className="flex items-center gap-4">
-              {/* Logo moved to Sidebar */}
-            </div>
+            {/* Left area */}
+            <div className="flex items-center gap-4"></div>
 
             {/* Center: Search Bar */}
             <div className="hidden md:flex flex-1 max-w-2xl mx-8">
@@ -69,17 +81,32 @@ const Navbar = () => {
               <Link to="/cart">
                 <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors relative">
                   <ShoppingBag className="w-6 h-6" />
-                  {/* Cart badge logic can be added here later */}
                 </button>
               </Link>
 
-              <Link
-                to="/Login"
-                className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 transition-all transform hover:-translate-y-0.5"
-              >
-                <User className="w-4 h-4" />
-                <span>Sign In</span>
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-gray-700 hidden sm:block">
+                    Hi, {user}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-medium hover:bg-red-100 transition-all"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 transition-all transform hover:-translate-y-0.5"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Sign In</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -121,8 +148,6 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
-
-      {/* Spacer removed (Navbar is now sticky) */}
     </>
   );
 };
