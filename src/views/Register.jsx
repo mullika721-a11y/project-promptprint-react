@@ -28,8 +28,6 @@ export default function Register() {
           placeholder="Enter Your Username"
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
-          value={formData.username}
-          onChange={handleChange}
         />
 
         <input
@@ -38,8 +36,6 @@ export default function Register() {
           placeholder="Enter Your Email"
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
-          value={formData.email}
-          onChange={handleChange}
         />
 
         <input
@@ -50,8 +46,7 @@ export default function Register() {
           maxLength={20}
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
-          value={formData.password}
-          onChange={handleChange}
+
         />
 
         <input
@@ -59,8 +54,6 @@ export default function Register() {
           placeholder="Confirm Password"
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
-          value={formData.confirmPassword}
-          onChange={handleChange}
         />
 
         <button
