@@ -24,25 +24,29 @@ export default function Register() {
 
         <input
           type="text"
+          name="username"
           placeholder="Enter Your Username"
-          className="bg-white py-2 px-3 w-80 rounded-xl"
+          className="bg-white py-2 px-3 w-full rounded-xl"
           required
         />
 
         <input
           type="email"
+          name="email"
           placeholder="Enter Your Email"
-          className="bg-white py-2 px-3 w-80 rounded-xl"
+          className="bg-white py-2 px-3 w-full rounded-xl"
           required
         />
 
         <input
           type="password"
+          name="password"
           placeholder="Password"
           minLength={8}
           maxLength={20}
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
+
         />
 
         <input
@@ -83,7 +87,7 @@ export default function Register() {
 
         <Link
           to="/"
-          className="bg-gray-300 text-black py-2 rounded-xl text-center"
+          className="bg-gray-300 text-black py-2 rounded-xl text-center hover:bg-gray-400 transition-colors"
         >
           Back to Home
         </Link>

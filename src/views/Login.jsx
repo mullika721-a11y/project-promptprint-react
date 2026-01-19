@@ -22,18 +22,19 @@ export default function Login() {
         <h2 className="font-bold text-3xl text-center">Login</h2>
 
         <input
-          type="email"
-          placeholder="Enter Your Email"
-          className="bg-white py-2 px-3 w-80 rounded-xl outline-none"
+          type="text"
+          name="email"
+          placeholder="Enter Your Email or Username"
+          className="bg-white py-2 px-3 w-full rounded-xl outline-none"
           required
         />
 
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          minLength={8}
-          maxLength={20}
-          className="bg-white py-2 px-3 w-80 rounded-xl"
+          minLength={6}
+          className="bg-white py-2 px-3 w-full rounded-xl"
           required
         />
 
@@ -74,7 +75,7 @@ export default function Login() {
 
         <Link
           to="/"
-          className="bg-gray-300 text-black py-2 rounded-xl text-center"
+          className="bg-gray-300 text-black py-2 rounded-xl text-center hover:bg-gray-400 transition-colors"
         >
           Back to Home
         </Link>
