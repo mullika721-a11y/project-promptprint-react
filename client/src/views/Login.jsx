@@ -16,8 +16,8 @@ export default function Login() {
         <input
           type="password"
           placeholder="Password"
-          minlength={8}
-          maxlength={20}
+          minLength={8}
+          maxLength={20}
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
         />
@@ -36,7 +36,7 @@ export default function Login() {
         <span className=" text-white">
           Not have an account?{" "}
           <Link
-            to="/signup"
+            to="/Signup"
             className=" text-white underline hover:text-violet-500"
           >
             Sign Up Here

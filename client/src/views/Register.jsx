@@ -23,8 +23,8 @@ export default function Register() {
         <input
           type="password"
           placeholder="Password"
-          minlength={8}
-          maxlength={20}
+          minLength={8}
+          maxLength={20}
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
         />
