@@ -19,13 +19,15 @@ import Faqs from "./views/Faqs";
 import Membership from "./views/Membership";
 import ForgetPassword from "./views/ForgetPassword";
 import ResetPassword from "./views/ResetPassword";
+import LandingPage from "./views/LandingPage"; //New code from Juang
 
 const App = () => {
   return (
     <Routes>
       {/* Main layout */}
       <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
+        <Route index element={<LandingPage />} /> //New code from Juang
+        <Route path="Home" element={<Home />} /> //New code from Juang
         <Route path="products" element={<ProductList />} />
         <Route path="admin/products" element={<AdminProduct />} />
         <Route path="admin/manage-products" element={<AdminProductList />} />
