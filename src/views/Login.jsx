@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
-
   const loginWithGoogle = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       console.log("Google Login Success:", tokenResponse);
@@ -18,8 +17,8 @@ export default function Login() {
       className="flex justify-center items-center min-h-screen bg-no-repeat bg-cover bg-center"
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
-      <form className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl">
-        <h2 className="font-bold text-3xl text-center">Login</h2>
+      <form className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl min-w-[350px]">
+        <h2 className="font-bold text-3xl text-center text-white">Login</h2>
 
         <input
           type="text"
@@ -27,8 +26,6 @@ export default function Login() {
           placeholder="Enter Your Email or Username"
           className="bg-white py-2 px-3 w-full rounded-xl outline-none"
           required
-          value={formData.username}
-          onChange={handleChange}
         />
 
         <input
@@ -38,8 +35,6 @@ export default function Login() {
           minLength={6}
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
-          value={formData.password}
-          onChange={handleChange}
         />
 
         <Link
@@ -63,7 +58,6 @@ export default function Login() {
           </Link>
         </span>
 
-        
         <button
           type="button"
           onClick={() => loginWithGoogle()}

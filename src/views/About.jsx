@@ -9,7 +9,7 @@ const About = () => {
           <h1 className="mt-6 font-bold text-8xl text-shadow-lg text-shadow-gray-500 max-md:text-4xl max-md:my-4 ">
             Prompt Print
           </h1>
-          <p className="font-light text-2xl text-balance  max-md:text-[20px] ">
+          <p className="font-light text-2xl text-balance  max-md:text-[20px ">
             At Prompt Print Shop, imagination has no limits. We seamlessly blend
             Prompt Engineering with your creative vision. By producing every
             item on-demand, we prioritize sustainability and eliminate

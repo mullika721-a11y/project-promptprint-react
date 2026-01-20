@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 
 export default function Register() {
-
   const loginWithGoogle = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       console.log("Google Login Success:", tokenResponse);
@@ -13,14 +12,13 @@ export default function Register() {
     },
   });
 
-
   return (
     <div
       className="flex justify-center items-center min-h-screen bg-no-repeat bg-cover bg-center"
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
-      <form className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl">
-        <h2 className="font-bold text-3xl text-center">Sign up</h2>
+      <form className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl min-w-[350px]">
+        <h2 className="font-bold text-3xl text-center text-white">Sign up</h2>
 
         <input
           type="text"
@@ -28,8 +26,6 @@ export default function Register() {
           placeholder="Enter Your Username"
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
-          value={formData.username}
-          onChange={handleChange}
         />
 
         <input
@@ -38,8 +34,6 @@ export default function Register() {
           placeholder="Enter Your Email"
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
-          value={formData.email}
-          onChange={handleChange}
         />
 
         <input
@@ -50,7 +44,6 @@ export default function Register() {
           maxLength={20}
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
-
         />
 
         <input
@@ -58,8 +51,6 @@ export default function Register() {
           placeholder="Confirm Password"
           className="bg-white py-2 px-3 w-80 rounded-xl"
           required
-          value={formData.confirmPassword}
-          onChange={handleChange}
         />
 
         <button
