@@ -11,7 +11,7 @@ const Cart = () => {
       const loadCart = async () => {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/cart/${userId}`
+            `${import.meta.env.VITE_API_URL}/api/cart/${userId}`,
           );
           const data = await response.json();
           setCart(data);
@@ -26,10 +26,32 @@ const Cart = () => {
   const fetchCart = async () => {
     if (!userId) return;
     try {
+      // 1. Fetch persistent cart from API
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/cart/${userId}`
+        `${import.meta.env.VITE_API_URL}/api/cart/${userId}`,
       );
-      const data = await response.json();
+      let data = await response.json();
+
+      // 2. Merge with temporary cart from localStorage (Custom AI Designs)
+      const tempCart =
+        JSON.parse(localStorage.getItem(`temp_cart_${userId}`)) || [];
+
+      if (tempCart.length > 0) {
+        // If API returns null/empty, init structure
+        if (!data || !data.items) {
+          data = { userId, items: [] };
+        }
+
+        // Combine items (simple append for now)
+        // Mark temp items so we don't try to update them via API that expects real Product IDs
+        const enrichedTempItems = tempCart.map((item) => ({
+          ...item,
+          _id: `temp-${Date.now()}-${Math.random()}`, // Fake ID for React key
+        }));
+
+        data.items = [...data.items, ...enrichedTempItems];
+      }
+
       setCart(data);
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -38,6 +60,25 @@ const Cart = () => {
 
   const updateQuantity = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
+
+    // Check for custom product ID convention
+    if (typeof productId === "string" && productId.startsWith("custom-")) {
+      const tempCart =
+        JSON.parse(localStorage.getItem(`temp_cart_${userId}`)) || [];
+      const updatedTempCart = tempCart.map((item) => {
+        if (item.productId._id === productId) {
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
+      localStorage.setItem(
+        `temp_cart_${userId}`,
+        JSON.stringify(updatedTempCart),
+      );
+      fetchCart();
+      return;
+    }
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
         method: "PUT",
@@ -57,12 +98,26 @@ const Cart = () => {
   };
 
   const removeItem = async (productId) => {
+    if (typeof productId === "string" && productId.startsWith("custom-")) {
+      const tempCart =
+        JSON.parse(localStorage.getItem(`temp_cart_${userId}`)) || [];
+      const updatedTempCart = tempCart.filter(
+        (item) => item.productId._id !== productId,
+      );
+      localStorage.setItem(
+        `temp_cart_${userId}`,
+        JSON.stringify(updatedTempCart),
+      );
+      fetchCart();
+      return;
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/cart/${userId}/${productId}`,
         {
           method: "DELETE",
-        }
+        },
       );
       if (response.ok) {
         fetchCart();
@@ -77,7 +132,7 @@ const Cart = () => {
     return cart.items
       .reduce(
         (total, item) => total + (item.productId?.price || 0) * item.quantity,
-        0
+        0,
       )
       .toFixed(2);
   };

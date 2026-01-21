@@ -1,7 +1,40 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useState } from "react";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("userId", data.userId);
+        alert("Login Successful");
+        navigate("/");
+        window.location.reload(); // Reload to update Navbar state
+      } else {
+        alert(data.error || "Login Failed");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Something went wrong. Please try again.");
+    }
+  };
+
   const loginWithGoogle = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       console.log("Google Login Success:", tokenResponse);
@@ -17,7 +50,10 @@ export default function Login() {
       className="flex justify-center items-center min-h-screen bg-no-repeat bg-cover bg-center"
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
-      <form className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl min-w-[350px]">
+      <form
+        onSubmit={handleLogin}
+        className="flex flex-col gap-4 p-18 rounded-3xl backdrop-blur-xs shadow-xl min-w-[350px]"
+      >
         <h2 className="font-bold text-3xl text-center text-white">Login</h2>
 
         <input
@@ -26,6 +62,8 @@ export default function Login() {
           placeholder="Enter Your Email or Username"
           className="bg-white py-2 px-3 w-full rounded-xl outline-none"
           required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
@@ -35,6 +73,8 @@ export default function Login() {
           minLength={6}
           className="bg-white py-2 px-3 w-full rounded-xl"
           required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
 
         <Link

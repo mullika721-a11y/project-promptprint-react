@@ -1,6 +1,15 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Sparkles, Download, Share2, ArrowLeft, Wand2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Sparkles,
+  Download,
+  Share2,
+  ArrowLeft,
+  Wand2,
+  RefreshCcw,
+  ShoppingCart,
+} from "lucide-react";
+import { Canvas, Image as FabricImage } from "fabric"; // Fabric.js v6+ named imports
 
 const AiDesign = () => {
   // const { productId } = useParams();
@@ -12,6 +21,152 @@ const AiDesign = () => {
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [originalImage, setOriginalImage] = useState(null);
   const [transparentImage, setTransparentImage] = useState(null);
+  const navigate = useNavigate();
+
+  const canvasRef = useRef(null);
+  const fabricCanvasRef = useRef(null);
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
+
+  // Initialize Fabric Canvas
+  useEffect(() => {
+    // Don't initialize if already exists
+    if (fabricCanvasRef.current) {
+      console.log("🎨 Fabric Canvas already exists, skipping init");
+      return;
+    }
+
+    if (!canvasRef.current) {
+      console.log("⚠️ Canvas DOM element not ready");
+      return;
+    }
+
+    console.log("🎨 Initializing Fabric Canvas...");
+
+    const canvas = new Canvas(canvasRef.current, {
+      width: 500,
+      height: 600,
+      backgroundColor: "#f9fafb",
+      selection: false,
+    });
+
+    fabricCanvasRef.current = canvas;
+    setIsCanvasReady(true);
+
+    // Load T-Shirt Background
+    const shirtImg = new Image();
+    shirtImg.src = "/products3.png";
+    shirtImg.onload = () => {
+      // Check if canvas still exists (in case of unmount)
+      if (!fabricCanvasRef.current) return;
+
+      const fabricImg = new FabricImage(shirtImg);
+      // Scale shirt to fit canvas
+      const scale =
+        Math.min(
+          canvas.width / fabricImg.width,
+          canvas.height / fabricImg.height,
+        ) * 0.9;
+
+      fabricImg.scale(scale);
+      fabricImg.set({
+        left: canvas.width / 2,
+        top: canvas.height / 2,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+      });
+
+      canvas.add(fabricImg);
+      canvas.sendToBack(fabricImg);
+      canvas.renderAll();
+      console.log("✅ T-shirt background loaded");
+    };
+
+    return () => {
+      console.log("🧹 Disposing Fabric Canvas");
+      canvas.dispose();
+      fabricCanvasRef.current = null; // Clear the ref!
+      setIsCanvasReady(false);
+    };
+  }, []);
+
+  // Handle Adding/Updating Design on Canvas
+  useEffect(() => {
+    if (!fabricCanvasRef.current || !generatedImage || !isCanvasReady) {
+      console.log("⏳ Waiting for canvas or image...", {
+        hasCanvas: !!fabricCanvasRef.current,
+        hasImage: !!generatedImage,
+        isReady: isCanvasReady,
+      });
+      return;
+    }
+
+    const canvas = fabricCanvasRef.current;
+
+    // Remove existing designs (keep background)
+    canvas.getObjects().forEach((obj) => {
+      if (obj.selectable) {
+        canvas.remove(obj);
+      }
+    });
+
+    const imgObj = new Image();
+    imgObj.crossOrigin = "anonymous";
+    imgObj.src = generatedImage;
+
+    console.log("🎨 Loading generated image onto canvas:", generatedImage);
+
+    imgObj.onload = () => {
+      // Double-check canvas still exists after async image load
+      if (!fabricCanvasRef.current) {
+        console.log("⚠️ Canvas was disposed before image loaded");
+        return;
+      }
+
+      console.log("✅ Image loaded successfully, creating Fabric object...");
+      const designImg = new FabricImage(imgObj);
+      const scale = (canvas.width * 0.4) / designImg.width;
+
+      designImg.set({
+        scaleX: scale,
+        scaleY: scale,
+        left: canvas.width / 2,
+        top: canvas.height * 0.4,
+        originX: "center",
+        originY: "center",
+        cornerColor: "white",
+        cornerStrokeColor: "#2563eb",
+        borderColor: "#2563eb",
+        cornerStyle: "circle",
+        transparentCorners: false,
+        padding: 10,
+      });
+
+      canvas.add(designImg);
+      canvas.setActiveObject(designImg);
+      designImg.bringToFront(); // Ensure it's on top of the shirt
+      canvas.renderAll();
+      console.log(
+        "🖌️ Canvas rendered with new design. Objects:",
+        canvas.getObjects().length,
+      );
+    };
+
+    imgObj.onerror = (err) => {
+      console.error("❌ Error loading image object:", err);
+    };
+  }, [generatedImage, isCanvasReady]);
+
+  // Handle Window Resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (!fabricCanvasRef.current || !canvasRef.current.parentElement) return;
+      // Logic for resizing canvas if needed
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt) return;
@@ -20,9 +175,7 @@ const AiDesign = () => {
     setOriginalImage(null);
     setTransparentImage(null); // Clear previous image
 
-    const apiUrl = `${
-      import.meta.env.VITE_API_URL || "http://localhost:5000"
-    }/api/generate-design`;
+    const apiUrl = "/api/generate-design";
     console.log("🚀 Sending request to:", apiUrl);
 
     try {
@@ -61,16 +214,58 @@ const AiDesign = () => {
   };
 
   const handleUseDesign = () => {
-    alert("Design selected! (Feature coming soon: Add to Cart)");
+    if (!fabricCanvasRef.current) return;
+
+    // Export Canvas to Data URL (capture the look)
+    const designDataUrl = fabricCanvasRef.current.toDataURL({
+      format: "png",
+      quality: 1,
+      multiplier: 1,
+    });
+
+    const customProduct = {
+      _id: `custom-${Date.now()}`,
+      name: "Custom AI T-Shirt",
+      description: `Custom design: ${prompt}`,
+      price: 590, // Fixed price for custom tee
+      imageUrl: designDataUrl, // Use the canvas snapshot
+      isCustom: true,
+    };
+
+    // Add to Cart Logic (Mock)
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      try {
+        const cartItem = {
+          productId: customProduct,
+          quantity: 1,
+        };
+
+        // Temporary: Save to local storage to simulate cart addition
+        const existingCart =
+          JSON.parse(localStorage.getItem(`temp_cart_${userId}`)) || [];
+        existingCart.push(cartItem);
+        localStorage.setItem(
+          `temp_cart_${userId}`,
+          JSON.stringify(existingCart),
+        );
+
+        navigate("/cart");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add to cart");
+      }
+    } else {
+      alert("Please login to purchase");
+      navigate("/login");
+    }
   };
 
   const handleRemoveBackground = async () => {
     if (!generatedImage) return;
     setIsRemovingBg(true);
 
-    const apiUrl = `${
-      import.meta.env.VITE_API_URL || "http://localhost:5000"
-    }/api/remove-background`;
+    const apiUrl = "/api/remove-background";
 
     try {
       const response = await fetch(apiUrl, {
@@ -132,38 +327,40 @@ const AiDesign = () => {
             )}
 
             {/* Main Preview Area */}
-            <div className="flex-1 flex items-center justify-center min-h-0 relative overflow-hidden">
-              <div className="relative w-full max-w-md aspect-3/4">
-                <div className="w-full h-full min-h-[400px] lg:min-h-0 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden relative group">
-                  {isGenerating ? (
-                    <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300 bg-white/90 p-6 rounded-2xl">
-                      <div className="relative">
-                        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Wand2 className="w-6 h-6 text-blue-600 animate-pulse" />
-                        </div>
+            <div className="flex-1 flex items-center justify-center min-h-0 relative overflow-hidden bg-white">
+              {/* Fabric Canvas Container */}
+              <div className="relative w-full h-full flex items-center justify-center bg-gray-50/50 rounded-xl overflow-hidden border border-gray-100">
+                <div className="relative shadow-xl">
+                  <canvas ref={canvasRef} width={500} height={600} />
+                </div>
+
+                {/* Loading Overlay */}
+                {isGenerating && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white/90 z-10 transition-all duration-300">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Wand2 className="w-6 h-6 text-blue-600 animate-pulse" />
                       </div>
-                      <span className="text-gray-500 font-medium">
-                        Creating your Image...
-                      </span>
                     </div>
-                  ) : generatedImage ? (
-                    <img
-                      src={generatedImage}
-                      alt="Generated Design"
-                      className="w-full h-full object-contain shadow-2xl transition-transform duration-500 hover:scale-[1.02]"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center text-gray-400 gap-4 bg-gray-50/50 p-6 rounded-2xl">
-                      <div className="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 opacity-50" />
-                      </div>
-                      <p className="text-sm font-medium">
-                        Your imagination appears here
+                    <span className="text-gray-500 font-medium">
+                      Creating your Image...
+                    </span>
+                  </div>
+                )}
+
+                {!generatedImage && !isGenerating && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <div className="bg-white/80 p-6 rounded-2xl backdrop-blur-sm text-center shadow-sm">
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        Preview Design
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Your generated artwork will appear here
                       </p>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
